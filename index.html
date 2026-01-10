@@ -638,12 +638,7 @@
 
     <script>
         let currentFilter = 'all';
-
-        // Initialize RSVPs from localStorage
-        function loadRSVPs() {
-            const rsvps = JSON.parse(localStorage.getItem('birthdayRSVPs') || '[]');
-            displayAttendees(rsvps);
-        }
+        const SHEETDB_API = 'https://sheetdb.io/api/v1/raj5uy3ex9q9l';
 
         // Handle RSVP form submission
         function handleRSVP(event) {
@@ -657,51 +652,56 @@
                 return;
             }
 
-            // Get existing RSVPs
-            let rsvps = JSON.parse(localStorage.getItem('birthdayRSVPs') || '[]');
-            
-            // Check if person already RSVPed
-            const existingIndex = rsvps.findIndex(r => r.name.toLowerCase() === name.toLowerCase());
-            
-            if (existingIndex !== -1) {
-                // Update existing RSVP
-                rsvps[existingIndex].status = status;
-                rsvps[existingIndex].timestamp = new Date().toISOString();
-                alert('✓ Your RSVP has been updated!');
-            } else {
-                // Add new RSVP
-                rsvps.push({
-                    name: name,
-                    status: status,
-                    timestamp: new Date().toISOString()
-                });
+            // Save to SheetDB
+            fetch(SHEETDB_API, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    data: [{
+                        Name: name,
+                        Status: status,
+                        Timestamp: new Date().toLocaleString()
+                    }]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
                 alert('🎉 Thank you for your RSVP!');
-            }
+                document.getElementById('rsvpForm').reset();
+                loadRSVPs(); // Refresh the list
+                
+                for (let i = 0; i < 30; i++) {
+                    setTimeout(createConfetti, i * 20);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error saving RSVP. Please try again.');
+            });
+        }
 
-            // Save to localStorage
-            localStorage.setItem('birthdayRSVPs', JSON.stringify(rsvps));
-            
-            // Clear form and reload list
-            document.getElementById('rsvpForm').reset();
-            displayAttendees(rsvps);
-            currentFilter = 'all';
-            updateTabButtons('all');
-
-            // Trigger confetti
-            for (let i = 0; i < 30; i++) {
-                setTimeout(createConfetti, i * 20);
-            }
+        // Load RSVPs on page load
+        function loadRSVPs() {
+            fetch(SHEETDB_API)
+                .then(response => response.json())
+                .then(data => {
+                    const rsvps = Array.isArray(data) ? data : [];
+                    displayAttendees(rsvps);
+                })
+                .catch(error => {
+                    console.error('Error loading RSVPs:', error);
+                    displayAttendees([]);
+                });
         }
 
         // Filter attendees
         function filterAttendees(filter) {
             currentFilter = filter;
             updateTabButtons(filter);
-            const rsvps = JSON.parse(localStorage.getItem('birthdayRSVPs') || '[]');
-            displayAttendees(rsvps);
+            loadRSVPs();
         }
-
-        // Update tab button styles
         function updateTabButtons(activeFilter) {
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
@@ -721,28 +721,32 @@
         // Display attendees list
         function displayAttendees(rsvps) {
             const list = document.getElementById('attendeesList');
-            const coming = rsvps.filter(r => r.status === 'coming');
-            const notComing = rsvps.filter(r => r.status === 'not-coming');
+            
+            // Map sheet data to our format
+            const formattedRsvps = rsvps.map(r => ({
+                name: r.Name || r.name || '',
+                status: r.Status || r.status || '',
+                timestamp: r.Timestamp || r.timestamp || ''
+            })).filter(r => r.name && r.status);
+
+            const coming = formattedRsvps.filter(r => r.status.toLowerCase() === 'yes, i\'ll be there!' || r.status.toLowerCase() === 'coming');
+            const notComing = formattedRsvps.filter(r => r.status.toLowerCase() === 'sorry, can\'t make it' || r.status.toLowerCase() === 'not-coming');
 
             // Update stats
-            document.getElementById('totalCount').textContent = rsvps.length;
+            document.getElementById('totalCount').textContent = formattedRsvps.length;
             document.getElementById('comingCount').textContent = coming.length;
             document.getElementById('notComingCount').textContent = notComing.length;
 
             // Filter based on current selection
-            let filtered = rsvps;
+            let filtered = formattedRsvps;
             if (currentFilter === 'coming') {
                 filtered = coming;
             } else if (currentFilter === 'not-coming') {
                 filtered = notComing;
             }
 
-            // Sort by status (coming first, then alphabetically)
-            const sorted = filtered.sort((a, b) => {
-                if (a.status === 'coming' && b.status !== 'coming') return -1;
-                if (a.status !== 'coming' && b.status === 'coming') return 1;
-                return a.name.localeCompare(b.name);
-            });
+            // Sort alphabetically
+            const sorted = filtered.sort((a, b) => a.name.localeCompare(b.name));
 
             if (sorted.length === 0) {
                 list.innerHTML = `
@@ -756,15 +760,20 @@
                 return;
             }
 
-            list.innerHTML = sorted.map(attendee => `
-                <div class="attendee-card ${attendee.status}">
-                    <div class="attendee-icon">${attendee.status === 'coming' ? '✅' : '❌'}</div>
-                    <div class="attendee-name">${attendee.name}</div>
-                    <div class="attendee-status ${attendee.status}">
-                        ${attendee.status === 'coming' ? '✓ Coming' : '✗ Can\'t Attend'}
+            list.innerHTML = sorted.map(attendee => {
+                const isComingStatus = attendee.status.toLowerCase().includes('yes') || attendee.status.toLowerCase() === 'coming';
+                const statusClass = isComingStatus ? 'coming' : 'not-coming';
+                
+                return `
+                    <div class="attendee-card ${statusClass}">
+                        <div class="attendee-icon">${isComingStatus ? '✅' : '❌'}</div>
+                        <div class="attendee-name">${attendee.name}</div>
+                        <div class="attendee-status ${statusClass}">
+                            ${isComingStatus ? '✓ Coming' : '✗ Can\'t Attend'}
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Scroll to RSVP section
@@ -821,19 +830,12 @@
         // Load RSVPs on page load
         window.addEventListener('load', () => {
             loadRSVPs();
+
             for (let i = 0; i < 60; i++) {
                 setTimeout(createConfetti, i * 30);
             }
         });
 
-        // Add confetti on button clicks
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('cta-button') || e.target.classList.contains('secondary-button')) {
-                for (let i = 0; i < 40; i++) {
-                    setTimeout(createConfetti, i * 20);
-                }
-            }
-        });
     </script>
 </body>
 </html>
