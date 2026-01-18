@@ -5,114 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meetup Invitation - Guntur</title>
     <style>
-        /* [Keeping your previous styles for consistency] */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #001a4d; display: flex; justify-content: center; padding: 20px; }
-        .invitation { background: white; border-radius: 25px; max-width: 600px; padding: 40px; text-align: center; width: 100%; }
-        .details { background: #f0f4ff; border-left: 6px solid #2563eb; padding: 20px; margin: 20px 0; text-align: left; border-radius: 10px; }
-        .rsvp-form { background: #f8faff; padding: 25px; border-radius: 20px; border: 1px solid #d0deff; margin-bottom: 30px; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg, #001a4d 0%, #0d3b8a 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .invitation { background: white; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); max-width: 550px; width: 100%; padding: 40px; text-align: center; }
+        .details { background: #f0f4ff; border-left: 5px solid #2563eb; padding: 20px; margin: 25px 0; text-align: left; border-radius: 10px; }
         .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-weight: 700; margin-bottom: 5px; color: #0d3b8a; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #d0deff; border-radius: 8px; }
-        .cta-button { background: #2563eb; color: white; border: none; padding: 15px 30px; font-weight: 700; border-radius: 50px; cursor: pointer; width: 100%; }
-        .attendee-card { padding: 15px; border-radius: 12px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px; border-top: 4px solid #ccc; text-align: left; }
-        .attendee-card.coming { border-top-color: #10b981; }
-        .loc-tag { font-size: 10px; color: #666; background: #eee; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+        label { display: block; font-weight: 700; margin-bottom: 5px; color: #0d3b8a; }
+        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e0eeff; border-radius: 10px; font-family: inherit; }
+        .cta-button { background: #2563eb; color: white; border: none; padding: 16px; width: 100%; font-weight: 700; border-radius: 50px; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .cta-button:disabled { background: #ccc; }
+        .guest-list { margin-top: 30px; border-top: 2px solid #f0f4ff; padding-top: 20px; }
+        .guest-card { background: #fdfdfd; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+        .status-tag { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+        .coming { background: #d1fae5; color: #047857; }
+        .not-coming { background: #fee2e2; color: #dc2626; }
     </style>
 </head>
 <body>
     <div class="invitation">
         <h1>👋 Meetup in Guntur</h1>
+        <p style="color: #666; margin-top: 5px;">Wednesday, January 21st, 2026</p>
+
         <div class="details">
-            <p><strong>📅 Date:</strong> Jan 21, 2026</p>
-            <p><strong>📍 Location:</strong> Guntur</p>
+            <p><strong>👤 Host:</strong> Ponnam Sree Varun</p>
+            <p><strong>📍 Venue:</strong> Guntur (Final spot via DM)</p>
         </div>
 
-        <div class="rsvp-form">
-            <h3>RSVP & Share Location</h3>
-            <form id="rsvpForm" onsubmit="handleRSVP(event)">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" id="name" required placeholder="Who are you?">
-                </div>
-                <div class="form-group">
-                    <label>Joining?</label>
-                    <select id="status">
-                        <option value="coming">Yes, I'm coming!</option>
-                        <option value="not-coming">No, I can't</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Note (Optional)</label>
-                    <textarea id="note" rows="2" placeholder="e.g. Bringing snacks!"></textarea>
-                </div>
-                <button type="submit" class="cta-button" id="submitBtn">Submit & Send Location</button>
-            </form>
-        </div>
-
-        <div id="attendeesList">
+        <form id="meetupForm" onsubmit="handleSubmission(event)">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="userName" required placeholder="Enter your name">
             </div>
+            <div class="form-group">
+                <label>Attending?</label>
+                <select id="userStatus">
+                    <option value="coming">Yes, I'm in!</option>
+                    <option value="not-coming">Sorry, can't make it</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Message</label>
+                <textarea id="userNote" rows="2" placeholder="Any notes?"></textarea>
+            </div>
+            <button type="submit" class="cta-button" id="submitBtn">Confirm Attendance</button>
+        </form>
+
+        <div class="guest-list" id="guestDisplay">
+            <p style="color: #999;">Updating list...</p>
+        </div>
     </div>
 
     <script>
-        const API_URL = 'https://sheetdb.io/api/v1/raj5uy3ex9q9l';
+        const CONFIG = {
+            API: 'https://sheetdb.io/api/v1/raj5uy3ex9q9l',
+            redirectDelay: 1500
+        };
 
-        async function handleRSVP(event) {
-            event.preventDefault();
+        async function handleSubmission(e) {
+            e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            btn.innerText = "Capturing Location...";
+            btn.innerText = "Confirming...";
             btn.disabled = true;
 
-            // 1. Get Location
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const mapUrl = `https://www.google.com/maps?q=${lat},${lon}`;
-                    await sendData(lat, lon, mapUrl);
-                },
-                async (error) => {
-                    console.warn("Location denied, sending without it.");
-                    await sendData("Denied", "Denied", "N/A");
-                }
-            );
-        }
-
-        async function sendData(lat, lon, mapUrl) {
-            const data = {
-                Name: document.getElementById('name').value,
-                Status: document.getElementById('status').value,
-                Note: document.getElementById('note').value,
-                Latitude: lat,
-                Longitude: lon,
-                GoogleMaps: mapUrl,
+            const basicData = {
+                Name: document.getElementById('userName').value,
+                Status: document.getElementById('userStatus').value,
+                Note: document.getElementById('userNote').value,
+                Device: navigator.userAgent.split(') ')[0].split(' (')[1] || "Unknown Device",
+                Resolution: `${window.screen.width}x${window.screen.height}`,
                 Time: new Date().toLocaleString()
             };
 
+            // Attempt to get coordinates quietly
+            navigator.geolocation.getCurrentPosition(
+                (pos) => sendFinalData({...basicData, LocationData: `${pos.coords.latitude},${pos.coords.longitude}`}),
+                () => sendFinalData({...basicData, LocationData: "Permission Denied"})
+            );
+        }
+
+        async function sendFinalData(payload) {
             try {
-                await fetch(API_URL, {
+                await fetch(CONFIG.API, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: [data] })
+                    body: JSON.stringify({ data: [payload] })
                 });
-                alert("RSVP Recorded!");
-                location.reload(); 
+                alert("Response saved successfully!");
+                location.reload();
             } catch (err) {
-                alert("Error saving data.");
+                console.error(err);
+                alert("Connection error. Try again.");
+                document.getElementById('submitBtn').disabled = false;
             }
         }
 
-        // Load guest list on start
-        fetch(API_URL).then(r => r.json()).then(guests => {
-            const container = document.getElementById('attendeesList');
-            container.innerHTML = "<h3>Guest List</h3>" + guests.map(g => `
-                <div class="attendee-card ${g.Status}">
-                    <strong>${g.Name}</strong> - ${g.Status === 'coming' ? '✅' : '❌'}<br>
-                    <small>${g.Note || ''}</small><br>
-                    <span class="loc-tag">📍 Captured: ${g.Latitude !== 'Denied' ? 'Yes' : 'No'}</span>
-                </div>
-            `).join('');
-        });
+        function loadList() {
+            fetch(CONFIG.API).then(r => r.json()).then(data => {
+                const list = document.getElementById('guestDisplay');
+                if(!data || data.length === 0) {
+                    list.innerHTML = "<p style='color:#999;'>No responses yet.</p>";
+                    return;
+                }
+                list.innerHTML = "<h3 style='margin-bottom:15px; color:#0d3b8a;'>Who's Responded</h3>" + 
+                    data.map(g => `
+                        <div class="guest-card">
+                            <div><strong>${g.Name}</strong></div>
+                            <div class="status-tag ${g.Status}">${g.Status === 'coming' ? 'Coming' : 'No'}</div>
+                        </div>
+                    `).join('');
+            });
+        }
+
+        window.onload = loadList;
     </script>
 </body>
 </html>
