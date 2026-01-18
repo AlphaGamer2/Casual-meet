@@ -33,312 +33,177 @@
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .balloons {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 40px;
-            height: 100px;
-        }
-
-        .balloon {
-            width: 50px;
-            height: 60px;
-            border-radius: 50% 50% 50% 0;
-            position: relative;
-            animation: float 3s ease-in-out infinite;
-            filter: drop-shadow(0 4px 8px rgba(0, 26, 77, 0.15));
-        }
-
-        .balloon:nth-child(1) { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); animation-delay: 0s; }
-        .balloon:nth-child(2) { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); animation-delay: 0.2s; }
-        .balloon:nth-child(3) { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); animation-delay: 0.4s; }
-        .balloon:nth-child(4) { background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%); animation-delay: 0.6s; }
-
-        .balloon::after {
-            content: '';
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 30px;
-            background: #999;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-30px); }
-        }
-
-        h1 {
-            color: #0d3b8a;
-            font-size: 48px;
-            margin-bottom: 10px;
-            animation: fadeInDown 0.8s ease-out;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-
-        .subtitle {
-            color: #1e5ab8;
-            font-size: 24px;
-            margin-bottom: 50px;
-            font-style: italic;
-            font-weight: 300;
-        }
+        h1 { color: #0d3b8a; font-size: 48px; margin-bottom: 10px; font-weight: 800; }
+        .subtitle { color: #1e5ab8; font-size: 24px; margin-bottom: 50px; font-style: italic; }
 
         .details {
             background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
             border-left: 6px solid #2563eb;
-            padding: 40px;
+            padding: 30px;
             margin: 40px 0;
             border-radius: 15px;
             text-align: left;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08);
         }
 
-        .detail-item {
-            margin: 20px 0;
-            font-size: 18px;
-            color: #001a4d;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .detail-label {
-            font-weight: 700;
-            color: #0d3b8a;
-            min-width: 120px;
-        }
-
-        .detail-value {
-            color: #1e5ab8;
-            font-weight: 600;
-        }
-
-        .message {
-            color: #444;
-            font-size: 18px;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
+        .detail-item { margin: 15px 0; font-size: 18px; color: #001a4d; display: flex; gap: 15px; }
+        .detail-label { font-weight: 700; color: #0d3b8a; min-width: 120px; }
 
         .cta-button {
             background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-            color: white;
-            border: none;
-            padding: 18px 50px;
-            font-size: 18px;
-            font-weight: 700;
-            border-radius: 50px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.3s ease;
+            color: white; border: none; padding: 18px 50px; font-size: 18px;
+            font-weight: 700; border-radius: 50px; cursor: pointer;
             box-shadow: 0 12px 35px rgba(37, 99, 235, 0.4);
-            text-transform: uppercase;
         }
 
-        .cta-button:hover { transform: translateY(-3px); box-shadow: 0 18px 45px rgba(37, 99, 235, 0.6); }
-
-        .secondary-button {
-            background: transparent;
-            color: #2563eb;
-            border: 2px solid #2563eb;
-            padding: 15px 45px;
-            font-size: 16px;
-            font-weight: 700;
-            border-radius: 50px;
-            cursor: pointer;
-            margin-left: 15px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-        }
-
-        .secondary-button:hover { background: #2563eb; color: white; }
-
-        .button-group { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
-
-        .divider { height: 2px; background: linear-gradient(90deg, transparent, #2563eb, transparent); margin: 30px 0; }
-
+        /* RSVP Form Styling */
         .rsvp-section { margin-top: 50px; padding-top: 40px; border-top: 3px solid #e0eeff; }
+        .rsvp-form { background: #f8faff; padding: 30px; border-radius: 20px; border: 1px solid #d0deff; margin: 30px 0; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-weight: 700; margin-bottom: 8px; color: #0d3b8a; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #d0deff; border-radius: 10px; }
 
-        .rsvp-header h2 { color: #0d3b8a; font-size: 32px; margin-bottom: 10px; font-weight: 800; }
+        /* Guest List Styling */
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
+        .stat-box { background: #f0f4ff; padding: 15px; border-radius: 10px; border: 1px solid #d0deff; }
+        .stat-number { font-size: 24px; font-weight: 900; }
+        .stat-label { font-size: 11px; color: #666; text-transform: uppercase; }
 
-        .rsvp-form {
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
-            padding: 40px;
-            border-radius: 20px;
-            margin: 40px 0;
-            border: 2px solid #d0deff;
-        }
+        .tabs { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .tab-button { padding: 8px 20px; border: 1px solid #d0deff; background: white; border-radius: 20px; cursor: pointer; }
+        .tab-button.active { background: #2563eb; color: white; border-color: #2563eb; }
 
-        .form-group { margin-bottom: 25px; text-align: left; }
-        .form-group label { display: block; color: #0d3b8a; font-weight: 700; margin-bottom: 10px; }
-        .form-group input, .form-group select { width: 100%; padding: 14px 16px; border: 2px solid #d0deff; border-radius: 10px; font-size: 16px; }
+        .attendees-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .attendee-card { padding: 15px; border-radius: 12px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid #ccc; }
+        .attendee-card.coming { border-top-color: #10b981; }
+        .attendee-card.not-coming { border-top-color: #ef4444; opacity: 0.8; }
+        .attendee-name { font-weight: 700; color: #0d3b8a; margin-bottom: 5px; font-size: 14px; }
+        .attendee-status { font-size: 11px; font-weight: 700; text-transform: uppercase; }
 
-        .submit-btn {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-            color: white;
-            border: none;
-            padding: 14px 50px;
-            font-size: 16px;
-            font-weight: 700;
-            border-radius: 10px;
-            cursor: pointer;
-            width: 100%;
-            text-transform: uppercase;
-        }
-
-        .copy-button { background: #f0f4ff; border: none; color: #2563eb; padding: 5px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; margin-left: 10px; }
-
-        .footer { margin-top: 40px; color: #999; font-size: 14px; border-top: 1px solid #e0eeff; padding-top: 20px; }
-
-        .confetti { position: fixed; width: 10px; height: 10px; pointer-events: none; border-radius: 50%; z-index: 999; }
+        .copy-button { background: #f0f4ff; border: none; color: #2563eb; padding: 4px 10px; border-radius: 10px; cursor: pointer; font-size: 12px; }
     </style>
 </head>
 <body>
     <div class="invitation">
-        <div class="balloons">
-            <div class="balloon"></div>
-            <div class="balloon"></div>
-            <div class="balloon"></div>
-            <div class="balloon"></div>
-        </div>
-
         <h1>👋 Casual Meetup!</h1>
-        <p class="subtitle">Let's catch up and hang out!</p>
+        <p class="subtitle">Guntur | Jan 21st</p>
 
         <div class="details">
-            <div class="detail-item">
-                <span class="detail-label">👤 Organized by:</span>
-                <span class="detail-value">Ponnam Sree Varun</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">📅 Date:</span>
-                <span class="detail-value">Wednesday, January 21st, 2026</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">🕐 Time:</span>
-                <span class="detail-value">Evening (TBD)</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">📍 Location:</span>
-                <span class="detail-value">Guntur, Andhra Pradesh</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">📞 Contact:</span>
-                <span class="detail-value">8977918559 <button class="copy-button" onclick="copyPhone()">Copy</button></span>
-            </div>
+            <div class="detail-item"><span class="detail-label">📅 Date:</span><span>Jan 21, 2026</span></div>
+            <div class="detail-item"><span class="detail-label">📍 Location:</span><span>Guntur</span></div>
+            <div class="detail-item"><span class="detail-label">📞 Contact:</span><span>8977918559 <button class="copy-button" onclick="copyPhone()">Copy</button></span></div>
         </div>
 
-        <div class="divider"></div>
+        <button class="cta-button" onclick="scrollToRSVP()">Are you coming? ✓</button>
 
-        <p class="message">
-            I'm planning a casual get-together in Guntur. It would be great to see everyone! Please confirm if you can make it so we can finalize the spot. ✨
-        </p>
-
-        <div class="button-group">
-            <button class="cta-button" onclick="scrollToRSVP()">Count Me In! ✓</button>
-            <button class="secondary-button" onclick="copyPhone()">Contact Me</button>
-        </div>
-
-        <div class="rsvp-section">
-            <div class="rsvp-header">
-                <h2>✉️ Are You Coming?</h2>
-                <p>Please let me know your availability!</p>
-            </div>
-            
+        <div class="rsvp-section" id="rsvp-area">
+            <h2>✉️ RSVP Here</h2>
             <div class="rsvp-form">
                 <form id="rsvpForm" onsubmit="handleRSVP(event)">
                     <div class="form-group">
-                        <label for="name">Your Name *</label>
-                        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                        <label>Your Name</label>
+                        <input type="text" id="name" required placeholder="Enter name">
                     </div>
                     <div class="form-group">
-                        <label for="status">Will You Attend? *</label>
-                        <select id="status" name="status" required>
-                            <option value="">-- Please Select --</option>
+                        <label>Will you join?</label>
+                        <select id="status" required>
                             <option value="coming">✅ Yes, I'm coming!</option>
                             <option value="not-coming">❌ Sorry, can't make it</option>
                         </select>
                     </div>
-                    <button type="submit" class="submit-btn">Submit RSVP</button>
+                    <button type="submit" style="width:100%;" class="cta-button">Submit Response</button>
                 </form>
             </div>
-        </div>
 
-        <div class="footer">
-            <p>Looking forward to seeing you all! | Guntur 2026</p>
+            <div class="attendees-section">
+                <h2 style="margin-bottom:20px;">👥 Guest List</h2>
+                
+                <div class="stats">
+                    <div class="stat-box"><div class="stat-number" id="totalCount">0</div><div class="stat-label">RSVPs</div></div>
+                    <div class="stat-box"><div class="stat-number" id="comingCount" style="color:#10b981;">0</div><div class="stat-label">Coming</div></div>
+                    <div class="stat-box"><div class="stat-number" id="notComingCount" style="color:#ef4444;">0</div><div class="stat-label">No</div></div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-button active" onclick="filterList('all', this)">All</button>
+                    <button class="tab-button" onclick="filterList('coming', this)">Coming</button>
+                    <button class="tab-button" onclick="filterList('not-coming', this)">Not Coming</button>
+                </div>
+
+                <div class="attendees-list" id="attendeesList">
+                    <p style="grid-column: 1/-1; color:#999;">Loading guest list...</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const SHEETDB_API = 'https://sheetdb.io/api/v1/raj5uy3ex9q9l';
+        let allGuests = [];
 
         function handleRSVP(event) {
             event.preventDefault();
-            const name = document.getElementById('name').value.trim();
+            const name = document.getElementById('name').value;
             const status = document.getElementById('status').value;
 
             fetch(SHEETDB_API, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    data: [{
-                        Name: name,
-                        Status: status,
-                        Timestamp: new Date().toLocaleString()
-                    }]
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert('🎉 Thanks for letting me know!');
+                body: JSON.stringify({ data: [{ Name: name, Status: status, Timestamp: new Date().toLocaleString() }] })
+            }).then(() => {
+                alert('RSVP Submitted!');
                 document.getElementById('rsvpForm').reset();
-                for (let i = 0; i < 30; i++) { setTimeout(createConfetti, i * 20); }
-            })
-            .catch(error => {
-                alert('Error saving RSVP. Please try again.');
+                loadGuests();
             });
         }
 
-        function scrollToRSVP() {
-            document.querySelector('.rsvp-section').scrollIntoView({ behavior: 'smooth' });
+        function loadGuests() {
+            fetch(SHEETDB_API)
+                .then(res => res.json())
+                .then(data => {
+                    allGuests = data;
+                    renderList('all');
+                });
         }
 
-        function copyPhone() {
-            navigator.clipboard.writeText('8977918559').then(() => alert('Phone number copied! 📋'));
+        function renderList(filter) {
+            const container = document.getElementById('attendeesList');
+            let filtered = allGuests;
+            
+            if(filter !== 'all') filtered = allGuests.filter(g => g.Status === filter);
+            
+            document.getElementById('totalCount').innerText = allGuests.length;
+            document.getElementById('comingCount').innerText = allGuests.filter(g => g.Status === 'coming').length;
+            document.getElementById('notComingCount').innerText = allGuests.filter(g => g.Status === 'not-coming').length;
+
+            if(filtered.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; color:#999;">No guests to show.</p>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(g => `
+                <div class="attendee-card ${g.Status}">
+                    <div class="attendee-name">${g.Name}</div>
+                    <div class="attendee-status" style="color:${g.Status === 'coming' ? '#10b981' : '#ef4444'}">
+                        ${g.Status === 'coming' ? '✓ Attending' : '✗ Unavailable'}
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function createConfetti() {
-            const confetti = document.createElement('div');
-            confetti.classList.add('confetti');
-            confetti.style.left = Math.random() * window.innerWidth + 'px';
-            confetti.style.top = '-10px';
-            confetti.style.background = ['#2563eb', '#1e40af', '#3b82f6'][Math.floor(Math.random() * 3)];
-            document.body.appendChild(confetti);
-
-            let top = 0;
-            const speed = Math.random() * 3 + 2;
-            const animate = () => {
-                top += speed;
-                confetti.style.top = top + 'px';
-                if (top < window.innerHeight) { requestAnimationFrame(animate); } 
-                else { confetti.remove(); }
-            };
-            animate();
+        function filterList(type, btn) {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderList(type);
         }
+
+        function scrollToRSVP() { document.getElementById('rsvp-area').scrollIntoView({ behavior: 'smooth' }); }
+        function copyPhone() { navigator.clipboard.writeText('8977918559').then(() => alert('Copied!')); }
+
+        window.onload = loadGuests;
     </script>
 </body>
 </html>
