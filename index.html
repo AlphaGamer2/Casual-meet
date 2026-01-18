@@ -197,16 +197,16 @@
 <body>
     <div class="container">
         <div class="card invitation-card">
-            <h1>👋Hi Are you free?</h1>
+            <h1>👋 Hi Are you free?</h1>
             <p class="subtitle">Casual Meetup</p>
 
             <div class="details">
                 <div class="detail-item"><span class="detail-label">📅 Date & Time:</span> Jan 21, 2026</div>
                 <div class="detail-item"><span class="detail-label">📍 Location:</span> Guntur</div>
-                <div class="detail-item"><span class="detail-label">🎉 Event:</span> Casual Hangout </div>
+                <div class="detail-item"><span class="detail-label">🎉 Event:</span> Casual Hangout</div>
             </div>
 
-            <form id="rsvpForm" onsubmit="handleRSVP(event)">
+            <form id="rsvpForm">
                 <div class="form-group">
                     <label>Your Name</label>
                     <input type="text" id="name" required placeholder="Enter your name">
@@ -245,143 +245,128 @@
     </div>
 
     <script>
-        const SHEETDB_API = 'https://sheetdb.io/api/v1/raj5uy3ex9q9l';
+        // Google Apps Script Web App URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjZl-W5lrDfkaHgS0We-8Ju8D0Hlkvr9czlr5f2Q0rGhm-qU9PTIFZDPxhVoo81ZA/exec';
 
-        // Comprehensive device & browser detection
-        function getBrowserInfo() {
-            const ua = navigator.userAgent;
-            let browser = "Unknown";
-            
-            if (/Chrome/.test(ua) && !/Chromium/.test(ua)) browser = "Chrome";
-            else if (/Safari/.test(ua) && !/Chrome/.test(ua)) browser = "Safari";
-            else if (/Firefox/.test(ua)) browser = "Firefox";
-            else if (/Edge/.test(ua) || /Edg/.test(ua)) browser = "Edge";
-            
-            return browser;
-        }
-
-        function getOS() {
-            const ua = navigator.userAgent;
-            if (/Windows/.test(ua)) return "Windows";
-            if (/Mac/.test(ua)) return "macOS";
-            if (/Linux/.test(ua)) return "Linux";
-            if (/iPhone|iPad|iPod/.test(ua)) return "iOS";
-            if (/Android/.test(ua)) return "Android";
-            return "Unknown";
-        }
-
-        function getDevice() {
-            const ua = navigator.userAgent;
-            const isIPad = /iPad|Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
-            if (isIPad) return "iPad";
-            if (/iPhone/.test(ua)) return "iPhone";
-            if (/Android/.test(ua)) return "Android Device";
-            if (/Windows/.test(ua)) return "Windows PC";
-            if (/Mac/.test(ua) && !isIPad) return "Mac";
-            return "Unknown Device";
-        }
-
-        function getConnectionType() {
-            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            return connection ? connection.effectiveType : "Unknown";
-        }
-
-        function getLanguage() {
-            return navigator.language || navigator.userLanguage;
-        }
-
-        function getTimezone() {
-            return Intl.DateTimeFormat().resolvedOptions().timeZone;
-        }
-
+        // Handle RSVP form submission
         async function handleRSVP(event) {
             event.preventDefault();
             const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerText;
             btn.innerText = "Processing...";
             btn.disabled = true;
 
-            let geoData = { city: "Private", region: "Unknown", org: "Unknown", ip: "Private" };
-            try {
-                const response = await fetch('https://ipapi.co/json/');
-                geoData = await response.json();
-            } catch (e) {}
-
             const data = {
-                Name: document.getElementById('name').value,
+                Name: document.getElementById('name').value.trim(),
                 Status: document.getElementById('status').value,
-                Device: getDevice(),
-                Browser: getBrowserInfo(),
-                OS: getOS(),
-                ScreenResolution: `${window.screen.width}x${window.screen.height}`,
-                ColorDepth: `${window.screen.colorDepth}-bit`,
-                City: geoData.city,
-                Region: geoData.region,
-                Country: geoData.country_name || "Unknown",
-                ISP: geoData.org,
-                IP: geoData.ip,
-                Timezone: getTimezone(),
-                Language: getLanguage(),
-                ConnectionType: getConnectionType(),
-                IsMobile: navigator.userAgentData?.mobile ? "Yes" : "No",
-                Timestamp: new Date().toLocaleString(),
-                UTC_Time: new Date().toISOString()
+                Time: new Date().toLocaleString()
             };
 
             try {
-                await fetch(SHEETDB_API, {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: [data] })
+                    body: JSON.stringify(data)
                 });
+
+                // Note: no-cors mode doesn't allow reading response
+                // We assume success if no error is thrown
                 alert("✅ RSVP Submitted! See you at the meetup! 🎉");
-                setTimeout(() => location.reload(), 500);
+                document.getElementById('rsvpForm').reset();
+                
+                // Wait a moment for Google Sheets to update, then refresh
+                setTimeout(() => loadGuests(true), 2000);
+                
             } catch (error) {
-                alert("Error submitting RSVP. Please try again.");
-                btn.innerText = "Confirm Attendance";
+                console.error('RSVP Error:', error);
+                alert("❌ Error submitting RSVP. Please check your internet connection and try again.");
+            } finally {
+                btn.innerText = originalText;
                 btn.disabled = false;
             }
         }
 
-        function loadGuests() {
-            fetch(SHEETDB_API)
-                .then(res => res.json())
-                .then(data => {
-                    const list = document.getElementById('attendeesList');
-                    const totalCount = document.getElementById('totalCount');
-                    const comingCount = document.getElementById('comingCount');
-                    const notComingCount = document.getElementById('notComingCount');
-                    
-                    if (!data.length) { 
-                        list.innerHTML = '<div class="empty-state">No RSVPs yet. Be the first to respond! 👇</div>';
-                        return;
+        // Load guest list from Google Sheets
+        let cachedGuests = null;
+        let lastFetchTime = 0;
+        const CACHE_DURATION = 30000; // 30 seconds cache
+
+        function loadGuests(forceRefresh = false) {
+            const now = Date.now();
+            
+            // Use cache if available and not forcing refresh
+            if (!forceRefresh && cachedGuests && (now - lastFetchTime < CACHE_DURATION)) {
+                displayGuests(cachedGuests);
+                return;
+            }
+
+            fetch(GOOGLE_SCRIPT_URL)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
                     }
-                    
-                    const coming = data.filter(g => g.Status === 'coming').length;
-                    const notComing = data.filter(g => g.Status === 'not-coming').length;
-                    
-                    totalCount.textContent = data.length;
-                    comingCount.textContent = coming;
-                    notComingCount.textContent = notComing;
-                    
-                    list.innerHTML = data.map(g => `
-                        <div class="guest-card">
-                            <div class="guest-info">
-                                <div class="guest-name">${g.Name}</div>
-                                <div class="guest-device">${g.Device || 'Unknown'} • ${g.Browser || 'Unknown'}</div>
-                            </div>
-                            <span class="status-badge ${g.Status}">${g.Status === 'coming' ? '✅ Coming' : '❌ Not Coming'}</span>
-                        </div>
-                    `).join('');
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('Loaded data:', data);
+                    cachedGuests = data;
+                    lastFetchTime = now;
+                    displayGuests(data);
                 })
                 .catch(error => {
                     console.error('Error loading guests:', error);
-                    document.getElementById('attendeesList').innerHTML = '<div class="empty-state">Unable to load guest list</div>';
+                    document.getElementById('attendeesList').innerHTML = '<div class="empty-state">Unable to load guest list. Please refresh the page.</div>';
                 });
         }
 
-        window.onload = loadGuests;
-        // Refresh guest list every 5 seconds
-        setInterval(loadGuests, 5000);
+        function displayGuests(data) {
+            const list = document.getElementById('attendeesList');
+            const totalCount = document.getElementById('totalCount');
+            const comingCount = document.getElementById('comingCount');
+            const notComingCount = document.getElementById('notComingCount');
+            
+            const guests = Array.isArray(data) ? data : [];
+            
+            if (guests.length === 0) { 
+                list.innerHTML = '<div class="empty-state">No RSVPs yet. Be the first to respond! 👇</div>';
+                totalCount.textContent = '0';
+                comingCount.textContent = '0';
+                notComingCount.textContent = '0';
+                return;
+            }
+            
+            const coming = guests.filter(g => g.Status === 'coming').length;
+            const notComing = guests.filter(g => g.Status === 'not-coming').length;
+            
+            totalCount.textContent = guests.length;
+            comingCount.textContent = coming;
+            notComingCount.textContent = notComing;
+            
+            list.innerHTML = guests.reverse().map(g => `
+                <div class="guest-card">
+                    <div class="guest-info">
+                        <div class="guest-name">${escapeHtml(g.Name || 'Unknown')}</div>
+                        <div class="guest-device">${escapeHtml(g.Time || 'No timestamp')}</div>
+                    </div>
+                    <span class="status-badge ${g.Status}">${g.Status === 'coming' ? '✅ Coming' : '❌ Not Coming'}</span>
+                </div>
+            `).join('');
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        document.getElementById('rsvpForm').addEventListener('submit', handleRSVP);
+        window.addEventListener('load', loadGuests);
+        
+        // Auto-refresh guest list every 2 minutes
+        setInterval(loadGuests, 120000);
     </script>
 </body>
 </html>
